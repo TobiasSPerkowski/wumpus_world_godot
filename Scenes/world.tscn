@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://dbuedm3mv0ed"]
+
+[ext_resource type="Script" uid="uid://y20fxx7llg1r" path="res://Scripts/world.gd" id="1_a02cp"]
+
+[node name="World" type="Node2D"]
+script = ExtResource("1_a02cp")
+rows = 4
+columns = 3
+num_pits = 2
