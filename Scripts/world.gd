@@ -3,16 +3,13 @@ class_name World
 
 var cells = []
 
-@export var rows: int
-@export var columns: int
-@export var num_pits: int
-@export var num_wumpus: int
+@export var rows: int = 4
+@export var columns: int = 4
+@export var num_pits: int = 0
+@export var num_wumpus: int = 0
 
 
 func _ready():
-	assert(rows != null)
-	assert(columns != null)
-	
 	randomize()
 	
 	_generate_world()
@@ -31,8 +28,10 @@ func _generate_world():
 				c.wall = true
 			row.append(c)
 		cells.append(row)
-	# add pits
+
 	_add_pits()
+	_add_wumpus()
+	_add_gold()
 
 
 func _add_pits():
@@ -44,7 +43,6 @@ func _add_pits():
 		var x = 1 + (randi() % rows)
 		var y = 1 + (randi() % columns)
 		if cells[x][y].pit:
-			print(cells[x][y].pit)
 			continue
 		cells[x][y].pit = true
 		cells[x-1][y].breeze = true
@@ -54,16 +52,49 @@ func _add_pits():
 		count += 1
 
 
+func _add_wumpus():
+	if num_wumpus > rows * columns:
+		print("Too many wumpus! Try again with less or a bigger world.")
+		get_tree().quit()
+	var count = 0
+	while count < num_wumpus:
+		var x = 1 + (randi() % rows)
+		var y = 1 + (randi() % columns)
+		if cells[x][y].wumpus or cells[x][y].pit:
+			continue
+		cells[x][y].wumpus = true
+		cells[x-1][y].stench = true
+		cells[x+1][y].stench = true
+		cells[x][y-1].stench = true
+		cells[x][y+1].stench = true
+		count += 1
+
+
+func _add_gold():
+	var done = false
+	while not done:
+		var x = 1 + (randi() % rows)
+		var y = 1 + (randi() % columns)
+		if cells[x][y].wumpus or cells[x][y].pit:
+			continue
+		cells[x][y].gold = true
+		done = true
+
+
 func _print_world():
 	for row in cells:
 		var str: String
 		for cell in row:
 			if cell.wall:
-				str += " | "
+				str += " # "
+			elif cell.gold:
+				str += " G "
 			elif cell.pit:
-				str += " o "
-			elif cell.breeze:
+				str += " P "
+			elif cell.wumpus:
+				str += " W "
+			elif cell.breeze or cell.stench:
 				str += " ~ "
 			else:
-				str += "   "
+				str += " . "
 		print(str)
