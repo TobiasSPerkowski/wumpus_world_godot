@@ -1,4 +1,4 @@
-extends Node
+extends Node2D
 class_name Cell
 
 var stench: bool = false
@@ -43,3 +43,22 @@ func _to_string() -> String:
 		str += "0"
 	
 	return str
+
+
+func show_sprites():
+	if wall:
+		$Wall.visible = true
+		return
+		
+	if gold:
+		$Gold.visible = true
+	elif pit:
+		$Pit.visible = true
+	elif wumpus:
+		$Wumpus.visible = true
+		
+	if breeze:
+		$Breeze.visible = true
+		
+	if stench:
+		$Stench.visible = true
