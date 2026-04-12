@@ -2,9 +2,7 @@
 
 ## To-Do
 
-- load maps (format?)
-- player 
-- visuals
+- control player via script (AI agent)
 - generate solvable maps
 
 

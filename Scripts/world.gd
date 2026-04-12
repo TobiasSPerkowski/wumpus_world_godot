@@ -7,8 +7,9 @@ var cell_size = 16
 var player_x = 1
 var player_y = 1
 
-@export var rows: int = 4
+@export var map_path: String
 @export var columns: int = 4
+@export var rows: int = 4
 @export var num_pits: int = 0
 @export var num_wumpus: int = 0
 
@@ -17,36 +18,94 @@ func _ready():
 	randomize()
 	
 	_set_scale()
-	_generate_world()
+	
+	if map_path:
+		_load_map()
+	else:
+		_generate_map()
+		
 	#_print_world()
-	_init_player(player_x, player_y)
+	_init_player()
 	#cells[1][1].show_sprites()
 
+
 func _set_scale():
-	var scale_x = get_window().size.x / (cell_size * (rows+2))
-	var scale_y = get_window().size.y / (cell_size * (columns+2))
+	var scale_x = get_window().size.x / (cell_size * (columns+2.0))
+	var scale_y = get_window().size.y / (cell_size * (rows+2.0))
 	if scale_x < scale_y:
 		scale *= scale_x
 	else:
 		scale *= scale_y
 
 
-func _generate_world():
-	var size_x = rows + 2   # padding for walls
-	var size_y =columns + 2 # padding for walls
-	# create cells
-	for i in range(size_x):
+func _load_map():
+	var file = FileAccess.open(map_path, FileAccess.READ)
+	
+	if file == null:
+		push_error("Erro ao abrir arquivo")
+		return
+	
+	var lines = []
+	while not file.eof_reached():
+		var line = file.get_line().strip_edges()
+		if line != "":
+			lines.append(line)
+	
+	file.close()
+	
+	columns = lines[0].length()
+	rows = lines.size()
+	
+	_init_cells()
+	_parse_map(lines)
+
+
+func _init_cells():
+	# + 2 -> padding for walls
+	var size_x = columns + 2 
+	var size_y = rows + 2
+	
+	for i in range(size_y):
 		var row = []
-		for j in range(size_y):
+		for j in range(size_x):
 			var c = cell_scene.instantiate()
-			if i == 0 or i == size_x-1 or j == 0 or j == size_y-1:
+			if i == 0 or i == size_y-1 or j == 0 or j == size_x-1:
 				c.wall = true
 			row.append(c)
-			c.position.x = 8 + i * cell_size
-			c.position.y = 8 + j * cell_size
+			c.position.x = 8 + j * cell_size
+			c.position.y = 8 + i * cell_size
 			add_child(c)
 		cells.append(row)
 
+
+func _parse_map(lines: Array):
+	for i in range(rows):
+		for j in range(columns):
+			if lines[i][j] == '#':
+				cells[i+1][j+1].wall = true
+			elif lines[i][j] == 'S':
+				player_x = j+1
+				player_y = i+1
+			elif lines[i][j] == 'G':
+				cells[i+1][j+1].gold = true
+			elif lines[i][j] == 'P':
+				cells[i+1][j+1].pit = true
+				cells[i][j+1].breeze = true
+				cells[i+2][j+1].breeze = true
+				cells[i+1][j].breeze = true
+				cells[i+1][j+2].breeze = true
+			elif lines[i][j] == 'W':
+				cells[i+1][j+1].wumpus = true
+				cells[i][j+1].stench = true
+				cells[i+2][j+1].stench = true
+				cells[i+1][j].stench = true
+				cells[i+1][j+2].stench = true
+
+
+func _generate_map():
+	# create cells
+	_init_cells()
+	# populate cells
 	_add_pits()
 	_add_wumpus()
 	_add_gold()
@@ -118,14 +177,14 @@ func _print_world():
 		print(str)
 
 
-func _init_player(x: int, y: int):
-	if x > columns:
-		x = columns
-	if y > rows:
-		y = rows
+func _init_player():
+	if player_x > columns:
+		player_x = columns
+	if player_y > rows:
+		player_y = rows
 	
-	$Player.position.x += x * cell_size
-	$Player.position.y += y * cell_size
+	$Player.position.x += player_x * cell_size
+	$Player.position.y += player_y * cell_size
 
 
 func _input(event: InputEvent):
@@ -140,21 +199,21 @@ func _input(event: InputEvent):
 
 
 func _wall_collision() -> bool:
-	var x = player_x
-	var y = player_y
+	var col = player_x
+	var row = player_y
 	var dir = $Player.dir
 	
-	if dir == $Player.Directions.NORTH and cells[x][y-1].wall:
-		cells[x][y-1].show_sprites()
+	if dir == $Player.Directions.NORTH and cells[row-1][col].wall:
+		cells[row-1][col].show_sprites()
 		return true
-	if dir == $Player.Directions.SOUTH and cells[x][y+1].wall:
-		cells[x][y+1].show_sprites()
+	if dir == $Player.Directions.SOUTH and cells[row+1][col].wall:
+		cells[row+1][col].show_sprites()
 		return true
-	if dir == $Player.Directions.EAST and cells[x+1][y].wall:
-		cells[x+1][y].show_sprites()
+	if dir == $Player.Directions.EAST and cells[row][col+1].wall:
+		cells[row][col+1].show_sprites()
 		return true
-	if dir == $Player.Directions.WEST and cells[x-1][y].wall:
-		cells[x-1][y].show_sprites()
+	if dir == $Player.Directions.WEST and cells[row][col-1].wall:
+		cells[row][col-1].show_sprites()
 		return true
 		
 	return false
@@ -164,15 +223,19 @@ func _update():
 	var dir = $Player.dir
 	
 	if dir == $Player.Directions.NORTH:
+		print("N")
 		player_y -= 1
 	elif dir == $Player.Directions.SOUTH:
+		print("S")
 		player_y += 1
 	elif dir == $Player.Directions.EAST:
+		print("E")
 		player_x += 1
 	else:
+		print("W")
 		player_x -= 1
 	
-	var c = cells[player_x][player_y]
+	var c = cells[player_y][player_x]
 	c.show_sprites()
 	if c.pit or c.wumpus:
 		$Player.hide()
