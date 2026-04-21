@@ -1,17 +1,35 @@
 extends Node2D
 class_name World
 
+enum ControlMode {MANUAL, AUTO}
+
 var cells = []
 var cell_scene = preload("res://Scenes/cell.tscn")
 var cell_size = 16
 var player_x = 1
 var player_y = 1
+var action_timer: float
+var agent_proc
+var agent_action: String
+var bumped_wall = false
 
+## choose between agent or manual player control
+@export var mode: ControlMode
+## time between each agent action (only used in auto mode)
+@export var action_interval: float = 1.0
+## global path to agent script (only used in auto mode)
+@export var agent_path: String
+## global path to a map file (leaving blank will generate a random map)
 @export var map_path: String
+## number of columns in the randomly generated map
 @export var columns: int = 4
+## number of rows in the randomly generated map
 @export var rows: int = 4
+## number of pits in the randomly generated map
 @export var num_pits: int = 0
+## number of wumpus in the randomly generated map
 @export var num_wumpus: int = 0
+
 
 
 func _ready():
@@ -27,6 +45,65 @@ func _ready():
 	#_print_world()
 	_init_player()
 	#cells[1][1].show_sprites()
+	
+	#if mode == ControlMode.AUTO:
+	#	agent_proc = OS.execute_with_pipe("python3", [agent_path], false)
+
+
+func _process(delta: float):
+	if mode == ControlMode.MANUAL:
+		return
+		
+	action_timer -= delta
+	
+	if action_timer <= 0:
+		if agent_proc:
+			_process_agent_action()
+			_send_agent_sensors()
+		else:
+			agent_proc = OS.execute_with_pipe("python3", [agent_path], false)
+		
+		action_timer = action_interval
+
+
+func _process_agent_action():
+	agent_action = agent_proc["stdio"].get_line()
+	if agent_action == "":
+		print("vazio")
+	else:
+		print(agent_action)
+	
+	if agent_action == "l":
+		$Player.turn_left()
+	elif agent_action == "r":
+		$Player.turn_right()
+	elif agent_action == "m":
+		if _wall_collision(): 
+			bumped_wall = true
+		else:
+			$Player.move_forward()
+			_update()
+	elif agent_action == "s":
+		pass # CHANGE (atira flecha)
+	elif agent_action == "e":
+		pass
+	elif agent_action == "p":
+		pass
+
+
+func _send_agent_sensors():
+	var c = cells[player_y][player_x]
+	var stench = "1" if c.stench else "0"
+	var breeze = "1" if c.breeze else "0"
+	var gold = "1" if c.gold else "0"
+	var wall = "1" if bumped_wall else "0"
+	var wumpus = "0" # CHANGE (wumpus scream)
+	
+	bumped_wall = false
+	
+	var sensors = "".join([stench, breeze, gold, wall, wumpus])
+	print(sensors)
+	agent_proc["stdio"].store_line(sensors)
 
 
 func _set_scale():
@@ -223,20 +300,22 @@ func _update():
 	var dir = $Player.dir
 	
 	if dir == $Player.Directions.NORTH:
-		print("N")
 		player_y -= 1
 	elif dir == $Player.Directions.SOUTH:
-		print("S")
 		player_y += 1
 	elif dir == $Player.Directions.EAST:
-		print("E")
 		player_x += 1
 	else:
-		print("W")
 		player_x -= 1
 	
 	var c = cells[player_y][player_x]
 	c.show_sprites()
+	
 	if c.pit or c.wumpus:
 		$Player.hide()
+		get_tree().paused = true
 		print("GAME OVER")
+	elif c.gold:
+		$Player.hide()
+		get_tree().paused = true
+		print("YOU WIN")
