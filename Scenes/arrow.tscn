@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://djbbs4ubsgbo6"]
+
+[ext_resource type="Script" uid="uid://ck7gu1nl7liyk" path="res://Scripts/arrow.gd" id="1_h5x2m"]
+[ext_resource type="Texture2D" uid="uid://ciulkldwp8ugu" path="res://Sprites/arrow.png" id="2_40cdi"]
+
+[node name="Arrow" type="Node2D"]
+script = ExtResource("1_h5x2m")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+z_index = 4095
+texture_filter = 1
+texture = ExtResource("2_40cdi")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+position = Vector2(0.5, 0.5)
+scale = Vector2(0.35, 0.15)
+
+[connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_screen_exited"]

@@ -1,12 +1,12 @@
 extends Node2D
 class_name Cell
 
-var stench: bool = false
-var breeze: bool = false
-var gold: bool = false
-var wall: bool = false
-var wumpus: bool = false
-var pit: bool = false
+var stench := false
+var breeze := false
+var gold := false
+var wall := false
+var wumpus := false
+var pit := false
 
 
 func _to_string() -> String:

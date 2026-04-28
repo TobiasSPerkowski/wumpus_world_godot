@@ -1,10 +1,12 @@
 extends Node2D
 class_name World
 
-enum ControlMode {MANUAL, AUTO}
+const Directions = Enums.Directions
+const ControlMode = Enums.ControlMode
 
 var cells = []
 var cell_scene = preload("res://Scenes/cell.tscn")
+var arrow_scene = preload("res://Scenes/arrow.tscn") 
 var cell_size = 16
 var player_x = 1
 var player_y = 1
@@ -12,6 +14,7 @@ var action_timer: float
 var agent_proc
 var agent_action: String
 var bumped_wall = false
+var wumpus_hit = false
 
 ## choose between agent or manual player control
 @export var mode: ControlMode
@@ -84,7 +87,7 @@ func _process_agent_action():
 			$Player.move_forward()
 			_update()
 	elif agent_action == "s":
-		pass # CHANGE (atira flecha)
+		_shoot_arrow()
 	elif agent_action == "e":
 		pass
 	elif agent_action == "p":
@@ -97,9 +100,10 @@ func _send_agent_sensors():
 	var breeze = "1" if c.breeze else "0"
 	var gold = "1" if c.gold else "0"
 	var wall = "1" if bumped_wall else "0"
-	var wumpus = "0" # CHANGE (wumpus scream)
+	var wumpus = "1" if wumpus_hit else "0"
 	
 	bumped_wall = false
+	wumpus_hit = false
 	
 	var sensors = "".join([stench, breeze, gold, wall, wumpus])
 	print(sensors)
@@ -273,6 +277,8 @@ func _input(event: InputEvent):
 		$Player.turn_left()
 	elif event.is_action_pressed("turn_right"):
 		$Player.turn_right()
+	elif event.is_action_pressed("shoot"):
+		_shoot_arrow()
 
 
 func _wall_collision() -> bool:
@@ -280,30 +286,55 @@ func _wall_collision() -> bool:
 	var row = player_y
 	var dir = $Player.dir
 	
-	if dir == $Player.Directions.NORTH and cells[row-1][col].wall:
+	if dir == Directions.NORTH and cells[row-1][col].wall:
 		cells[row-1][col].show_sprites()
 		return true
-	if dir == $Player.Directions.SOUTH and cells[row+1][col].wall:
+	if dir == Directions.SOUTH and cells[row+1][col].wall:
 		cells[row+1][col].show_sprites()
 		return true
-	if dir == $Player.Directions.EAST and cells[row][col+1].wall:
+	if dir == Directions.EAST and cells[row][col+1].wall:
 		cells[row][col+1].show_sprites()
 		return true
-	if dir == $Player.Directions.WEST and cells[row][col-1].wall:
+	if dir == Directions.WEST and cells[row][col-1].wall:
 		cells[row][col-1].show_sprites()
 		return true
 		
 	return false
 
 
+func _shoot_arrow():
+	var dir = $Player.dir
+	
+	if dir == Directions.NORTH:
+		for i in range(player_y, 0, -1):
+			if cells[i][player_x].wumpus:
+				wumpus_hit = true
+	elif dir == Directions.SOUTH:
+		for i in range(player_y, rows, 1):
+			if cells[i][player_x].wumpus:
+				wumpus_hit = true
+	elif dir == Directions.EAST:
+		for i in range(player_x, columns, +1):
+			if cells[player_y][i].wumpus:
+				wumpus_hit = true
+	else:
+		for i in range(player_x, 0, -1):
+			if cells[player_y][i].wumpus:
+				wumpus_hit = true
+	# animation
+	var a = arrow_scene.instantiate()
+	a.set_dir(dir)
+	$Player.add_child(a)
+
+
 func _update():
 	var dir = $Player.dir
 	
-	if dir == $Player.Directions.NORTH:
+	if dir == Directions.NORTH:
 		player_y -= 1
-	elif dir == $Player.Directions.SOUTH:
+	elif dir == Directions.SOUTH:
 		player_y += 1
-	elif dir == $Player.Directions.EAST:
+	elif dir == Directions.EAST:
 		player_x += 1
 	else:
 		player_x -= 1

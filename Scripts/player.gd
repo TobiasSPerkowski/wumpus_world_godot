@@ -1,9 +1,9 @@
 extends Node2D
 class_name Player
 
-enum Directions {NORTH, SOUTH, EAST, WEST}
+const Directions = Enums.Directions
 
-var dir := Directions.NORTH
+var dir := Directions.EAST
 
 
 func turn_left():
@@ -16,7 +16,7 @@ func turn_left():
 	elif dir == Directions.WEST:
 		dir = Directions.SOUTH
 		
-	$Sprite.rotation_degrees -= 90
+	_update_sprite()
 
 
 func turn_right():
@@ -29,7 +29,22 @@ func turn_right():
 	elif dir == Directions.WEST:
 		dir = Directions.NORTH
 	
-	$Sprite.rotation_degrees += 90
+	_update_sprite()
+
+
+func _update_sprite():
+	if dir == Directions.NORTH:
+		$Sprite.rotation_degrees = -90
+		$Sprite.flip_h = false
+	elif dir == Directions.SOUTH:
+		$Sprite.rotation_degrees = 90
+		$Sprite.flip_h = false
+	elif dir == Directions.EAST:
+		$Sprite.rotation_degrees = 0
+		$Sprite.flip_h = false
+	elif dir == Directions.WEST:
+		$Sprite.rotation_degrees = 0
+		$Sprite.flip_h = true
 
 
 func move_forward():

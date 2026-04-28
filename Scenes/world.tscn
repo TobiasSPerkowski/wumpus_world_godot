@@ -5,8 +5,7 @@
 
 [node name="World" type="Node2D"]
 script = ExtResource("1_a02cp")
-mode = 1
-agent_path = "/home/tobias/agent.py"
+agent_path = "/home/tobias/TCC/desafio_wumpus/agent.py"
 map_path = "res://Maps/test.txt"
 num_pits = 1
 num_wumpus = 1
