@@ -38,13 +38,13 @@ var wumpus_hit = false
 func _ready():
 	randomize()
 	
-	_set_scale()
-	
 	if map_path:
 		_load_map()
 	else:
 		_generate_map()
-		
+	
+	_set_scale()
+	
 	#_print_world()
 	_init_player()
 	#cells[1][1].show_sprites()
@@ -92,6 +92,8 @@ func _process_agent_action():
 		pass
 	elif agent_action == "p":
 		pass
+	else:
+		_process_agent_action()
 
 
 func _send_agent_sensors():
@@ -106,13 +108,13 @@ func _send_agent_sensors():
 	wumpus_hit = false
 	
 	var sensors = "".join([stench, breeze, gold, wall, wumpus])
-	print(sensors)
 	agent_proc["stdio"].store_line(sensors)
 
 
 func _set_scale():
 	var scale_x = get_window().size.x / (cell_size * (columns+2.0))
 	var scale_y = get_window().size.y / (cell_size * (rows+2.0))
+	
 	if scale_x < scale_y:
 		scale *= scale_x
 	else:
