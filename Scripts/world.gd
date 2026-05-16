@@ -2,7 +2,7 @@ extends Node2D
 class_name World
 
 const Directions = Enums.Directions
-const ControlMode = Enums.ControlMode
+const AdvisorPath = "Scripts/advisor.py"
 
 var cells = []
 var cell_scene = preload("res://Scenes/cell.tscn")
@@ -16,12 +16,7 @@ var agent_action: String
 var bumped_wall = false
 var wumpus_hit = false
 
-## choose between agent or manual player control
-@export var mode: ControlMode
-## time between each agent action (only used in auto mode)
-@export var action_interval: float = 1.0
-## global path to agent script (only used in auto mode)
-@export var agent_path: String
+
 ## global path to a map file (leaving blank will generate a random map)
 @export var map_path: String
 ## number of columns in the randomly generated map
@@ -47,53 +42,9 @@ func _ready():
 	
 	#_print_world()
 	_init_player()
-	#cells[1][1].show_sprites()
+	cells[player_y][player_x].show_sprites()
 	
-	#if mode == ControlMode.AUTO:
-	#	agent_proc = OS.execute_with_pipe("python3", [agent_path], false)
-
-
-func _process(delta: float):
-	if mode == ControlMode.MANUAL:
-		return
-		
-	action_timer -= delta
-	
-	if action_timer <= 0:
-		if agent_proc:
-			_process_agent_action()
-			_send_agent_sensors()
-		else:
-			agent_proc = OS.execute_with_pipe("python3", [agent_path], false)
-		
-		action_timer = action_interval
-
-
-func _process_agent_action():
-	agent_action = agent_proc["stdio"].get_line()
-	if agent_action == "":
-		print("vazio")
-	else:
-		print(agent_action)
-	
-	if agent_action == "l":
-		$Player.turn_left()
-	elif agent_action == "r":
-		$Player.turn_right()
-	elif agent_action == "m":
-		if _wall_collision(): 
-			bumped_wall = true
-		else:
-			$Player.move_forward()
-			_update()
-	elif agent_action == "s":
-		_shoot_arrow()
-	elif agent_action == "e":
-		pass
-	elif agent_action == "p":
-		pass
-	else:
-		_process_agent_action()
+	agent_proc = OS.execute_with_pipe("python3", ["-u", AdvisorPath], false)
 
 
 func _send_agent_sensors():
@@ -241,25 +192,6 @@ func _add_gold():
 		done = true
 
 
-func _print_world():
-	for row in cells:
-		var str: String
-		for cell in row:
-			if cell.wall:
-				str += " # "
-			elif cell.gold:
-				str += " G "
-			elif cell.pit:
-				str += " P "
-			elif cell.wumpus:
-				str += " W "
-			elif cell.breeze or cell.stench:
-				str += " ~ "
-			else:
-				str += " . "
-		print(str)
-
-
 func _init_player():
 	if player_x > columns:
 		player_x = columns
@@ -275,12 +207,28 @@ func _input(event: InputEvent):
 		if not _wall_collision(): 
 			$Player.move_forward()
 			_update()
+		else:
+			bumped_wall = true
+		_send_agent_sensors()
 	elif event.is_action_pressed("turn_left"):
 		$Player.turn_left()
+		agent_proc["stdio"].store_line("l")
 	elif event.is_action_pressed("turn_right"):
 		$Player.turn_right()
+		agent_proc["stdio"].store_line("r")
 	elif event.is_action_pressed("shoot"):
 		_shoot_arrow()
+	elif event.is_action_pressed("help"):
+		_get_help()
+
+
+func _get_help():
+	var advise = ""
+	agent_proc["stdio"].store_line("h")
+	while advise == "":
+		advise = agent_proc["stdio"].get_line()
+	
+	print(advise)
 
 
 func _wall_collision() -> bool:
@@ -310,18 +258,22 @@ func _shoot_arrow():
 	if dir == Directions.NORTH:
 		for i in range(player_y, 0, -1):
 			if cells[i][player_x].wumpus:
+				cells[i][player_x].wumpus = false
 				wumpus_hit = true
 	elif dir == Directions.SOUTH:
 		for i in range(player_y, rows, 1):
 			if cells[i][player_x].wumpus:
+				cells[i][player_x].wumpus = false
 				wumpus_hit = true
 	elif dir == Directions.EAST:
 		for i in range(player_x, columns, +1):
 			if cells[player_y][i].wumpus:
+				cells[player_y][i].wumpus = false
 				wumpus_hit = true
 	else:
 		for i in range(player_x, 0, -1):
 			if cells[player_y][i].wumpus:
+				cells[player_y][i].wumpus = false
 				wumpus_hit = true
 	# animation
 	var a = arrow_scene.instantiate()
