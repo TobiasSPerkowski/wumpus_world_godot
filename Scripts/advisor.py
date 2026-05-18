@@ -46,7 +46,6 @@ class WumpusKB:
         return not has_pit and not has_wumpus
 
 
-DIRECTIONS = ["N", "E", "S", "W"]
 MOVES = [
     ( 0, 1),  # N
     ( 1, 0),  # E
@@ -135,44 +134,31 @@ class Agent:
                 if self.kb.is_safe(c[0], c[1]):
                     self.safe.add(c)
 
-
-    def get_next_move(self):
+    def get_move(self):
         x,y = self.pos
         tx,ty = self.target
         dx,dy = tx - x, ty - y
 
-        #finding target's direction
-        target_dir = None
-        for i, m in enumerate(MOVES):
+        for m in MOVES:
             if m == (dx,dy):
-                target_dir = i
-                break
-        
-        # moves towards target
-        if self.dir == target_dir:
-            return "m"
-        if target_dir == (self.dir - 1) % 4:
-            return "l"
-        else:
-            return "r"
+                return m
     
-
     def choose(self):
         # already has target, gets next move towards it
         if self.target and self.pos != self.target:
-            return self.get_next_move()
+            return self.get_move()
 
         # looks for an unvisited adjacent cell
         adj = [c for c in self.adj(self.pos) if c not in self.walls]
         for cell in adj:
             if cell in self.safe and cell not in self.visited:
                 self.target = cell
-                return self.get_next_move()
+                return self.get_move()
         
         # backtracks
         if len(self.path_stack) > 0:
             self.target = self.path_stack[-1]
-            return self.get_next_move()
+            return self.get_move()
         
         # gives up
         return "e"
@@ -188,8 +174,8 @@ while True:
     input = line.strip()
 
     if input[0] == 'h': # player asked help
-        action = agent.choose()
-        print(action, flush=True)
+        move = agent.choose()
+        print(move, flush=True)
     elif input[0] == 'l': # player turned left
         agent.turn_left()
     elif input[0] == 'r': # player turned right

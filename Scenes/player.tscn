@@ -10,3 +10,5 @@ script = ExtResource("1_v0iea")
 z_index = 4096
 texture_filter = 1
 texture = ExtResource("2_cvnsp")
+
+[node name="Camera2D" type="Camera2D" parent="."]

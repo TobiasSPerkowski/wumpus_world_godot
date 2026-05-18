@@ -7,7 +7,6 @@ const AdvisorPath = "Scripts/advisor.py"
 var cells = []
 var cell_scene = preload("res://Scenes/cell.tscn")
 var arrow_scene = preload("res://Scenes/arrow.tscn") 
-var cell_size = 16
 var player_x = 1
 var player_y = 1
 var action_timer: float
@@ -29,7 +28,6 @@ var wumpus_hit = false
 @export var num_wumpus: int = 0
 
 
-
 func _ready():
 	randomize()
 	
@@ -38,11 +36,10 @@ func _ready():
 	else:
 		_generate_map()
 	
-	_set_scale()
-	
-	#_print_world()
+	#_set_scale()
 	_init_player()
 	cells[player_y][player_x].show_sprites()
+	RenderingServer.set_default_clear_color(Color.BLACK)
 	
 	agent_proc = OS.execute_with_pipe("python3", ["-u", AdvisorPath], false)
 
@@ -63,8 +60,8 @@ func _send_agent_sensors():
 
 
 func _set_scale():
-	var scale_x = get_window().size.x / (cell_size * (columns+2.0))
-	var scale_y = get_window().size.y / (cell_size * (rows+2.0))
+	var scale_x = get_window().size.x / (Cell.size * (columns+2.0))
+	var scale_y = get_window().size.y / (Cell.size * (rows+2.0))
 	
 	if scale_x < scale_y:
 		scale *= scale_x
@@ -106,8 +103,8 @@ func _init_cells():
 			if i == 0 or i == size_y-1 or j == 0 or j == size_x-1:
 				c.wall = true
 			row.append(c)
-			c.position.x = 8 + j * cell_size
-			c.position.y = 8 + i * cell_size
+			c.position.x = 8 + j * Cell.size
+			c.position.y = 8 + i * Cell.size
 			add_child(c)
 		cells.append(row)
 
@@ -198,15 +195,15 @@ func _init_player():
 	if player_y > rows:
 		player_y = rows
 	
-	$Player.position.x += player_x * cell_size
-	$Player.position.y += player_y * cell_size
+	$Player.position.x = player_x * Cell.size + Cell.size/2
+	$Player.position.y = player_y * Cell.size + Cell.size/2
 
 
 func _input(event: InputEvent):
 	if event.is_action_pressed("move_forward"):
 		if not _wall_collision(): 
-			$Player.move_forward()
-			_update()
+			if $Player.move_forward():
+				_update()
 		else:
 			bumped_wall = true
 		_send_agent_sensors()
@@ -218,17 +215,22 @@ func _input(event: InputEvent):
 		agent_proc["stdio"].store_line("r")
 	elif event.is_action_pressed("shoot"):
 		_shoot_arrow()
-	elif event.is_action_pressed("help"):
-		_get_help()
+	elif event.is_action_pressed("hint"):
+		_get_hint()
 
 
-func _get_help():
-	var advise = ""
-	agent_proc["stdio"].store_line("h")
-	while advise == "":
-		advise = agent_proc["stdio"].get_line()
+func _get_hint():
+	var move = ""
 	
-	print(advise)
+	agent_proc["stdio"].store_line("h")
+	
+	while move == "":
+		move = agent_proc["stdio"].get_line()
+	
+	var dy = move.split(",")[0].to_int()
+	var dx = move.split(",")[1].to_int()
+	
+	cells[player_y+dy][player_x+dx].hint()
 
 
 func _wall_collision() -> bool:

@@ -1,6 +1,8 @@
 extends Node2D
 class_name Cell
 
+static var size = 16
+
 var stench := false
 var breeze := false
 var gold := false
@@ -46,6 +48,8 @@ func _to_string() -> String:
 
 
 func show_sprites():
+	$Floor.visible = true
+	
 	if wall:
 		$Wall.visible = true
 		return
@@ -62,3 +66,7 @@ func show_sprites():
 		
 	if stench:
 		$Stench.visible = true
+
+
+func hint():
+	$Animation.play("hint")

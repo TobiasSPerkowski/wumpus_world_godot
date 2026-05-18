@@ -3,7 +3,35 @@ class_name Player
 
 const Directions = Enums.Directions
 
+var moving := false
 var dir := Directions.EAST
+var target_rot := 0.0
+var target_pos : Vector2
+var cell_size
+
+@export var speed := 10.0
+
+
+func _process(delta: float):
+	_rotate(delta)
+	
+	if moving:
+		_move(delta)
+
+
+func _rotate(delta: float):
+	if target_rot == null:
+		return
+	
+	$Sprite.rotation = lerp_angle($Sprite.rotation, target_rot, delta*speed)
+
+
+func _move(delta: float):
+	position = position.lerp(target_pos, delta*speed)
+	
+	if position.distance_to(target_pos) < 1:
+		position = target_pos
+		moving = false
 
 
 func turn_left():
@@ -34,25 +62,38 @@ func turn_right():
 
 func _update_sprite():
 	if dir == Directions.NORTH:
-		$Sprite.rotation_degrees = -90
-		$Sprite.flip_h = false
+		target_rot = -PI/2
 	elif dir == Directions.SOUTH:
-		$Sprite.rotation_degrees = 90
-		$Sprite.flip_h = false
+		target_rot = PI/2
 	elif dir == Directions.EAST:
-		$Sprite.rotation_degrees = 0
-		$Sprite.flip_h = false
+		target_rot = 0
+		$Sprite.flip_v = false
 	elif dir == Directions.WEST:
-		$Sprite.rotation_degrees = 0
-		$Sprite.flip_h = true
+		target_rot = PI
+		$Sprite.flip_v = true
 
 
-func move_forward():
+func move_forward() -> bool:
+	if moving:
+		return false # needs to finish current movement
+	
+	var x
+	var y
+	
 	if dir == Directions.NORTH:
-		position.y -= 16
+		x = position.x
+		y = position.y - Cell.size
 	elif dir == Directions.SOUTH:
-		position.y += 16
+		x = position.x
+		y = position.y + Cell.size
 	elif dir == Directions.EAST:
-		position.x += 16
-	else:
-		position.x -= 16
+		x = position.x + Cell.size
+		y = position.y
+	else: # WEST
+		x = position.x - Cell.size
+		y = position.y
+	
+	target_pos = Vector2(x, y)
+	moving = true
+	
+	return true
