@@ -204,9 +204,10 @@ func _input(event: InputEvent):
 		if not _wall_collision(): 
 			if $Player.move_forward():
 				_update()
+				_send_agent_sensors()
 		else:
 			bumped_wall = true
-		_send_agent_sensors()
+			_send_agent_sensors()
 	elif event.is_action_pressed("turn_left"):
 		$Player.turn_left()
 		agent_proc["stdio"].store_line("l")
@@ -217,20 +218,40 @@ func _input(event: InputEvent):
 		_shoot_arrow()
 	elif event.is_action_pressed("hint"):
 		_get_hint()
+	elif event.is_action_pressed("debug"):
+		var output = "a"
+		agent_proc["stdio"].store_line("d")
+		while output != "":
+			output = agent_proc["stdio"].get_line()
+			print(output)
 
 
 func _get_hint():
 	var move = ""
+	var shoot = false
+	var dx
+	var dy
 	
 	agent_proc["stdio"].store_line("h")
 	
 	while move == "":
 		move = agent_proc["stdio"].get_line()
 	
-	var dy = move.split(",")[0].to_int()
-	var dx = move.split(",")[1].to_int()
+	move = move.split(",")
 	
-	cells[player_y+dy][player_x+dx].hint()
+	if move[0] == "e":
+		print("GIVE UP")
+		return
+		
+	if move[0] == "s":
+		shoot = true
+		dy = move[1].to_int()
+		dx = move[2].to_int()
+	else:
+		dy = move[0].to_int()
+		dx = move[1].to_int()
+	
+	cells[player_y+dy][player_x+dx].hint(shoot)
 
 
 func _wall_collision() -> bool:
@@ -258,22 +279,23 @@ func _shoot_arrow():
 	var dir = $Player.dir
 	
 	if dir == Directions.NORTH:
-		for i in range(player_y, 0, -1):
+		for i in range(player_y-1, 0, -1):
 			if cells[i][player_x].wumpus:
 				cells[i][player_x].wumpus = false
 				wumpus_hit = true
 	elif dir == Directions.SOUTH:
-		for i in range(player_y, rows, 1):
+		for i in range(player_y+1, rows+1, 1):
 			if cells[i][player_x].wumpus:
 				cells[i][player_x].wumpus = false
 				wumpus_hit = true
 	elif dir == Directions.EAST:
-		for i in range(player_x, columns, +1):
+		for i in range(player_x+1, columns+1, +1):
 			if cells[player_y][i].wumpus:
 				cells[player_y][i].wumpus = false
 				wumpus_hit = true
 	else:
-		for i in range(player_x, 0, -1):
+		for i in range(player_x-1, 0, -1):
+			cells[player_y][i].hint()
 			if cells[player_y][i].wumpus:
 				cells[player_y][i].wumpus = false
 				wumpus_hit = true

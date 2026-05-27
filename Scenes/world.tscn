@@ -6,7 +6,7 @@
 [node name="World" type="Node2D"]
 scale = Vector2(5, 5)
 script = ExtResource("1_a02cp")
-map_path = "Maps/test1.txt"
+map_path = "Maps/test4.txt"
 
 [node name="Player" parent="." instance=ExtResource("2_go701")]
 position = Vector2(83.4, 59.8)

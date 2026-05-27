@@ -49,6 +49,7 @@ func _to_string() -> String:
 
 func show_sprites():
 	$Floor.visible = true
+	$Hint.visible = false
 	
 	if wall:
 		$Wall.visible = true
@@ -68,5 +69,10 @@ func show_sprites():
 		$Stench.visible = true
 
 
-func hint():
-	$Animation.play("hint")
+func hint(shoot: bool):
+	if shoot:
+		$Hint.modulate = Color.RED
+	else:
+		$Hint.modulate = Color.GREEN
+	
+	$Hint.visible = true
