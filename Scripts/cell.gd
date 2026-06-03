@@ -76,3 +76,21 @@ func hint(shoot: bool):
 		$Hint.modulate = Color.GREEN
 	
 	$Hint.visible = true
+
+
+func turn_into_pit():
+	stench = false
+	breeze = false
+	gold = false
+	wall = false
+	wumpus = false
+	pit = true
+
+
+func turn_into_wumpus():
+	stench = false
+	breeze = false
+	gold = false
+	wall = false
+	wumpus = true
+	pit = false

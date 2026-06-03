@@ -10,10 +10,9 @@ var arrow_scene = preload("res://Scenes/arrow.tscn")
 var player_x = 1
 var player_y = 1
 var action_timer: float
-var agent_proc
-var agent_action: String
+var advisor_proc
+var advisor_action: String
 var bumped_wall = false
-var wumpus_hit = false
 
 
 ## global path to a map file (leaving blank will generate a random map)
@@ -26,6 +25,8 @@ var wumpus_hit = false
 @export var num_pits: int = 0
 ## number of wumpus in the randomly generated map
 @export var num_wumpus: int = 0
+## number of arrows the player will start with
+@export var num_arrows: int = 2
 
 
 func _ready():
@@ -41,22 +42,22 @@ func _ready():
 	cells[player_y][player_x].show_sprites()
 	RenderingServer.set_default_clear_color(Color.BLACK)
 	
-	agent_proc = OS.execute_with_pipe("python3", ["-u", AdvisorPath], false)
+	advisor_proc = OS.execute_with_pipe("python3", ["-u", AdvisorPath], false)
+	
+	advisor_proc["stdio"].store_line("a " + str(num_arrows))
 
 
-func _send_agent_sensors():
+func _send_advisor_sensors():
 	var c = cells[player_y][player_x]
 	var stench = "1" if c.stench else "0"
 	var breeze = "1" if c.breeze else "0"
 	var gold = "1" if c.gold else "0"
 	var wall = "1" if bumped_wall else "0"
-	var wumpus = "1" if wumpus_hit else "0"
+	var sensors = "".join([stench, breeze, gold, wall])
+	
+	advisor_proc["stdio"].store_line(sensors)
 	
 	bumped_wall = false
-	wumpus_hit = false
-	
-	var sensors = "".join([stench, breeze, gold, wall, wumpus])
-	agent_proc["stdio"].store_line(sensors)
 
 
 func _set_scale():
@@ -201,48 +202,85 @@ func _init_player():
 
 func _input(event: InputEvent):
 	if event.is_action_pressed("move_forward"):
-		if not _wall_collision(): 
-			if $Player.move_forward():
-				_update()
-				_send_agent_sensors()
-		else:
-			bumped_wall = true
-			_send_agent_sensors()
+		if not _is_safe_move():
+			#_change_forward_cell()
+			print("NOT SAFE")
+		_handle_movement()
 	elif event.is_action_pressed("turn_left"):
 		$Player.turn_left()
-		agent_proc["stdio"].store_line("l")
+		advisor_proc["stdio"].store_line("l")
 	elif event.is_action_pressed("turn_right"):
 		$Player.turn_right()
-		agent_proc["stdio"].store_line("r")
+		advisor_proc["stdio"].store_line("r")
 	elif event.is_action_pressed("shoot"):
 		_shoot_arrow()
 	elif event.is_action_pressed("hint"):
 		_get_hint()
 	elif event.is_action_pressed("debug"):
 		var output = "a"
-		agent_proc["stdio"].store_line("d")
+		advisor_proc["stdio"].store_line("d")
 		while output != "":
-			output = agent_proc["stdio"].get_line()
+			output = advisor_proc["stdio"].get_line()
 			print(output)
 
 
+func _change_forward_cell():
+	var fx = player_x
+	var fy = player_y
+	
+	if $Player.dir == Directions.NORTH:
+		fy-=1
+	elif $Player.dir == Directions.SOUTH:
+		fy+=1
+	elif $Player.dir == Directions.EAST:
+		fx+=1
+	else: # west
+		fx-=1
+	
+	var c_cell = cells[player_y][player_x]
+	var f_cell = cells[fy][fx]
+	
+	if c_cell.breeze:
+		f_cell.turn_into_pit()
+	else: # stench
+		f_cell.turn_into_wumpus()
+	
+
+
+func _handle_movement():
+	if not _wall_collision(): 
+		if $Player.move_forward():
+			_update()
+			_send_advisor_sensors()
+	else:
+		bumped_wall = true
+		_send_advisor_sensors()
+
+
+func _query_advisor(input: String):
+	var output = ""
+	
+	advisor_proc["stdio"].store_line(input)
+	
+	while output == "":
+		output = advisor_proc["stdio"].get_line()
+	
+	return output
+
+func _process(delta: float) -> void:
+	print(advisor_proc["stderr"].get_line())
+
 func _get_hint():
-	var move = ""
+	var move = _query_advisor("h")
 	var shoot = false
 	var dx
 	var dy
-	
-	agent_proc["stdio"].store_line("h")
-	
-	while move == "":
-		move = agent_proc["stdio"].get_line()
 	
 	move = move.split(",")
 	
 	if move[0] == "e":
 		print("GIVE UP")
 		return
-		
 	if move[0] == "s":
 		shoot = true
 		dy = move[1].to_int()
@@ -252,6 +290,15 @@ func _get_hint():
 		dx = move[1].to_int()
 	
 	cells[player_y+dy][player_x+dx].hint(shoot)
+
+
+func _is_safe_move() -> bool:
+	# checks safety with advisor	
+	var safe = _query_advisor("c")
+	if safe == "True":
+		return true
+		
+	return false
 
 
 func _wall_collision() -> bool:
@@ -277,28 +324,38 @@ func _wall_collision() -> bool:
 
 func _shoot_arrow():
 	var dir = $Player.dir
+	var hit = false
 	
+	# scanning for wumpus in shot direction
 	if dir == Directions.NORTH:
 		for i in range(player_y-1, 0, -1):
 			if cells[i][player_x].wumpus:
 				cells[i][player_x].wumpus = false
-				wumpus_hit = true
+				hit = true
 	elif dir == Directions.SOUTH:
 		for i in range(player_y+1, rows+1, 1):
 			if cells[i][player_x].wumpus:
 				cells[i][player_x].wumpus = false
-				wumpus_hit = true
+				hit = true
 	elif dir == Directions.EAST:
 		for i in range(player_x+1, columns+1, +1):
 			if cells[player_y][i].wumpus:
 				cells[player_y][i].wumpus = false
-				wumpus_hit = true
+				hit = true
 	else:
 		for i in range(player_x-1, 0, -1):
-			cells[player_y][i].hint()
 			if cells[player_y][i].wumpus:
 				cells[player_y][i].wumpus = false
-				wumpus_hit = true
+				hit = true
+	
+	# informing the advisor
+	if hit:
+		advisor_proc["stdio"].store_line("s 1")
+		print("* SCREAM *")
+	else:
+		advisor_proc["stdio"].store_line("s 0")
+		print("........")
+	
 	# animation
 	var a = arrow_scene.instantiate()
 	a.set_dir(dir)
