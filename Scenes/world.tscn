@@ -1,13 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://dbuedm3mv0ed"]
+[gd_scene format=3 uid="uid://dbuedm3mv0ed"]
 
 [ext_resource type="Script" uid="uid://y20fxx7llg1r" path="res://Scripts/world.gd" id="1_a02cp"]
 [ext_resource type="PackedScene" uid="uid://dkgytutqprnqd" path="res://Scenes/player.tscn" id="2_go701"]
+[ext_resource type="Script" uid="uid://cqmknee7s148k" path="res://Scripts/advisor.gd" id="3_5a7ea"]
+[ext_resource type="Script" uid="uid://cp3mn3m1f1gkw" path="res://Scripts/map.gd" id="4_8j60k"]
 
-[node name="World" type="Node2D"]
-scale = Vector2(5, 5)
+[node name="World" type="Node2D" unique_id=1606265040]
+scale = Vector2(4, 4)
 script = ExtResource("1_a02cp")
 map_path = "Maps/test4.txt"
 num_arrows = 99
 
-[node name="Player" parent="." instance=ExtResource("2_go701")]
-position = Vector2(83.4, 59.8)
+[node name="Advisor" type="Node" parent="." unique_id=1659591231]
+script = ExtResource("3_5a7ea")
+
+[node name="Map" type="Node2D" parent="." unique_id=406088497]
+script = ExtResource("4_8j60k")
+
+[node name="Player" parent="." unique_id=1735071669 instance=ExtResource("2_go701")]
+position = Vector2(1668, 1196)

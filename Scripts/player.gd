@@ -7,8 +7,10 @@ var moving := false
 var dir := Directions.EAST
 var target_rot := 0.0
 var target_pos : Vector2
-var cell_size
+var arrows = 0
+var arrow_scene = preload("res://Scenes/arrow.tscn")
 
+## Player movement/rotation speed 
 @export var speed := 10.0
 
 
@@ -97,3 +99,10 @@ func move_forward() -> bool:
 	moving = true
 	
 	return true
+
+
+func shoot_arrow():
+	var a = arrow_scene.instantiate()
+	a.set_dir(dir)
+	add_child(a)
+	arrows -= 1
