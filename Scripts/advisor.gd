@@ -6,6 +6,11 @@ var process
 
 func _ready():
 	process = OS.execute_with_pipe(exec_path, [], false)
+	#process = OS.execute_with_pipe("python3", ["Advisor/advisor.py"], false)
+
+
+#func _process(delta: float) -> void:
+	#print(process["stderr"].get_line())
 
 
 func player_turned(dir: String):

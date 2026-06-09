@@ -299,7 +299,8 @@ class Advisor:
         return False
     
     def check_shots(self):
-        for shot in self.shots:
+        # loops thru a copy to avoid skipping elements after remove
+        for shot in self.shots[:]:
             pos, dir, scream = shot
             cells = []
 
@@ -311,7 +312,7 @@ class Advisor:
                 cells = [c for c in self.cells if c[0] == pos[0] and c[1] < pos[1]]
             else: # W
                 cells = [c for c in self.cells if c[1] == pos[1] and c[0] < pos[0]]
-            
+
             if scream:
                 for c in cells:
                     cell = self.cells[c]
@@ -328,12 +329,12 @@ class Advisor:
                     self.kb.add_clause([no_wumpus])
                     if cell.wall:
                         self.shots.remove(shot)
-                        break
+                        break       
 
     def arrow_shot(self, scream):
         shot = (self.pos, self.dir, scream)
         self.shots.append(shot)
-
+        
         self.arrows -= 1
         
 
