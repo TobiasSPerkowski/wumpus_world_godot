@@ -7,7 +7,6 @@ var moving := false
 var dir := Directions.EAST
 var target_rot := 0.0
 var target_pos : Vector2
-var arrows = 0
 var arrow_scene = preload("res://Scenes/arrow.tscn")
 
 ## Player movement/rotation speed 
@@ -101,8 +100,18 @@ func move_forward() -> bool:
 	return true
 
 
-func shoot_arrow():
+func shoot_arrow() -> bool:
+	if GameState.arrows <= 0:
+		GameState.exception.emit("Sem mais flechas")
+		return false
+	
+	GameState.arrows -= 1
 	var a = arrow_scene.instantiate()
 	a.set_dir(dir)
 	add_child(a)
-	arrows -= 1
+	
+	return true
+	
+
+func bump():
+	$AnimationPlayer.play("screen_shake", -1, 2)

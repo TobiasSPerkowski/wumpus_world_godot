@@ -136,7 +136,7 @@ class Advisor:
         return [(x-1, y), (x, y-1), (x+1, y), (x, y+1)]
 
     def update(self, sensors):
-        stench, breeze, glitter, bump = sensors
+        stench, breeze, bump = sensors
 
         if bump == '1': # wall
             wall = self.forward_pos()
@@ -336,6 +336,7 @@ class Advisor:
         self.shots.append(shot)
         
         self.arrows -= 1
+        print(self.arrows, file=sys.stderr)
         
 
 
@@ -364,7 +365,7 @@ while True:
         advisor.add_arrows(int(input[1]))
     elif input[0] == "s": # player shot arrow
         advisor.arrow_shot(int(input[1]))
-    elif len(input[0]) == 4: # player moved, input == sensors
+    elif len(input[0]) == 3: # player moved, input == sensors
         advisor.update(input[0])
     else:
         break

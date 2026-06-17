@@ -34,6 +34,10 @@ func load_from_file(path: String):
 	_init_cells()
 	_parse_map(lines)
 	cells[player_y][player_x].show_sprites()
+	if GameState.debug:
+		for line in cells:
+			for cell in line:
+				cell.show_sprites()
 
 
 func _init_cells():

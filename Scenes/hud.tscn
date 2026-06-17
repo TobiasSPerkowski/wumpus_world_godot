@@ -1,0 +1,98 @@
+[gd_scene format=3 uid="uid://s88allwjvjfi"]
+
+[ext_resource type="Script" uid="uid://yennluik2cdi" path="res://Scripts/hud.gd" id="1_e0onf"]
+
+[node name="Hud" type="CanvasLayer" unique_id=656926613]
+script = ExtResource("1_e0onf")
+
+[node name="Arrows" type="HBoxContainer" parent="." unique_id=1564396120]
+custom_minimum_size = Vector2(0, 100)
+offset_right = 99.0
+offset_bottom = 100.0
+alignment = 1
+
+[node name="Text" type="Label" parent="Arrows" unique_id=1205246099]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "        Flechas: "
+
+[node name="Value" type="Label" parent="Arrows" unique_id=910211795]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "0"
+
+[node name="Hints" type="HBoxContainer" parent="." unique_id=1647551797]
+custom_minimum_size = Vector2(0, 100)
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -79.0
+offset_bottom = 100.0
+grow_horizontal = 0
+alignment = 1
+
+[node name="Text" type="Label" parent="Hints" unique_id=1501116513]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "Dicas: "
+
+[node name="Value" type="Label" parent="Hints" unique_id=1573341739]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "0"
+
+[node name="Padding" type="Label" parent="Hints" unique_id=1785192408]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "        "
+
+[node name="Sensors" type="HBoxContainer" parent="." unique_id=1806556436]
+custom_minimum_size = Vector2(0, 100)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -100.0
+offset_right = 223.0
+grow_vertical = 0
+alignment = 1
+
+[node name="Text" type="Label" parent="Sensors" unique_id=24915228]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "        Célula atual: "
+
+[node name="Value" type="Label" parent="Sensors" unique_id=684376490]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "Vazia"
+
+[node name="Messages" type="HBoxContainer" parent="." unique_id=223441556]
+custom_minimum_size = Vector2(0, 100)
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -162.0
+offset_top = -28.0
+grow_horizontal = 0
+grow_vertical = 0
+alignment = 1
+
+[node name="Text" type="Label" parent="Messages" unique_id=869253723]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+
+[node name="Padding" type="Label" parent="Messages" unique_id=140878086]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "        "

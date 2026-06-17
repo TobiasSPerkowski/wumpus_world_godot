@@ -28,34 +28,70 @@ grow_vertical = 2
 [node name="Main" type="VBoxContainer" parent="CenterContainer" unique_id=136433682]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 25
 
 [node name="Title" type="Label" parent="CenterContainer/Main" unique_id=1295223010]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Wumpus World
+text = "Wumpus: Echoes of The Lost
 "
 
-[node name="Start" type="Button" parent="CenterContainer/Main" unique_id=153908538]
-custom_minimum_size = Vector2(100, 0)
+[node name="Play" type="Button" parent="CenterContainer/Main" unique_id=153908538]
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 20
-text = "Iniciar"
+theme_override_font_sizes/font_size = 22
+text = "Jogar"
 
 [node name="Help" type="Button" parent="CenterContainer/Main" unique_id=2106826340]
-custom_minimum_size = Vector2(100, 0)
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "Ajuda"
 
 [node name="Quit" type="Button" parent="CenterContainer/Main" unique_id=291483458]
-custom_minimum_size = Vector2(100, 0)
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "Sair"
+
+[node name="MapSelecton" type="VBoxContainer" parent="CenterContainer" unique_id=1084980947]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 400)
+layout_mode = 2
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="Title" type="Label" parent="CenterContainer/MapSelecton" unique_id=1808505835]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 24
+text = "Selecione o Tabuleiro"
+
+[node name="Scroll" type="ScrollContainer" parent="CenterContainer/MapSelecton" unique_id=953190936]
+custom_minimum_size = Vector2(100, 180)
+layout_direction = 3
+layout_mode = 2
+size_flags_horizontal = 4
+horizontal_scroll_mode = 0
+
+[node name="MapList" type="VBoxContainer" parent="CenterContainer/MapSelecton/Scroll" unique_id=1035253970]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 10
+
+[node name="Back" type="Button" parent="CenterContainer/MapSelecton" unique_id=1668632158]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 22
+text = "Voltar"
 
 [node name="Help" type="VBoxContainer" parent="CenterContainer" unique_id=937901042]
 unique_name_in_owner = true
@@ -65,17 +101,15 @@ theme_override_constants/separation = 14
 
 [node name="Title" type="Label" parent="CenterContainer/Help" unique_id=21766758]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 24
 text = "Ajuda"
 horizontal_alignment = 1
 
 [node name="Text" type="Label" parent="CenterContainer/Help" unique_id=1703925403]
 custom_minimum_size = Vector2(550, 0)
 layout_mode = 2
-text = "No Wumpus World, o objetivo é encontrar o ouro, sem cair num poço ou ser pego por um Wumpus. 
-Mova apenas quando possuir informações suficientes para confirmar que a posição à frente é segura. 
-Ao redor dos poços haverá brisa, e ao redor dos Wumpus fedor.  
-Ao serem atingidos por flechas, os Wumpus gritam e morrem. "
+text = "Objetivo: 
+Encontrar o ouro, sem cair num poço ou ser pego por um Wumpus"
 horizontal_alignment = 1
 
 [node name="Text2" type="Label" parent="CenterContainer/Help" unique_id=1227927795]
@@ -84,25 +118,28 @@ text = "Controles:
 W - Mover para frente
 D - Girar no sentido horário
 A - Girar no sentido anti-horàrio
-Espaço - Atirar  flecha
-H - Usar dica"
+Espaço - Atirar flecha
+H - Usar dica
+Esc - Voltar ao Menu"
 horizontal_alignment = 1
 
 [node name="Text3" type="Label" parent="CenterContainer/Help" unique_id=1173085310]
 layout_mode = 2
 text = "Dicas:
 Verde - Mover até a posição indicada
-Vermelha - Atirar na posição indicada"
+Vermelha - Atirar na posição indicada
+"
 horizontal_alignment = 1
 
-[node name="Back" type="Button" parent="CenterContainer/Help" unique_id=1686553081]
-custom_minimum_size = Vector2(100, 0)
+[node name="Back" type="Button" parent="CenterContainer/Help" unique_id=703579015]
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "Voltar"
 
-[connection signal="pressed" from="CenterContainer/Main/Start" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="CenterContainer/Main/Play" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="CenterContainer/Main/Help" to="." method="_on_help_pressed"]
 [connection signal="pressed" from="CenterContainer/Main/Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="CenterContainer/MapSelecton/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="CenterContainer/Help/Back" to="." method="_on_back_pressed"]

@@ -4,12 +4,11 @@
 [ext_resource type="PackedScene" uid="uid://dkgytutqprnqd" path="res://Scenes/player.tscn" id="2_go701"]
 [ext_resource type="Script" uid="uid://cqmknee7s148k" path="res://Scripts/advisor.gd" id="3_5a7ea"]
 [ext_resource type="Script" uid="uid://cp3mn3m1f1gkw" path="res://Scripts/map.gd" id="4_8j60k"]
+[ext_resource type="PackedScene" uid="uid://s88allwjvjfi" path="res://Scenes/hud.tscn" id="5_fo5ed"]
 
 [node name="World" type="Node2D" unique_id=1606265040]
 scale = Vector2(4, 4)
 script = ExtResource("1_a02cp")
-map_path = "Maps/level4.txt"
-num_arrows = 99
 
 [node name="Advisor" type="Node" parent="." unique_id=1659591231]
 script = ExtResource("3_5a7ea")
@@ -19,3 +18,5 @@ script = ExtResource("4_8j60k")
 
 [node name="Player" parent="." unique_id=1735071669 instance=ExtResource("2_go701")]
 position = Vector2(1668, 1196)
+
+[node name="Hud" parent="." unique_id=656926613 instance=ExtResource("5_fo5ed")]
