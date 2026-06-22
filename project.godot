@@ -25,8 +25,8 @@ GameState="*uid://pyil1jj5q8ao"
 
 [display]
 
-window/size/viewport_width=1600
-window/size/viewport_height=900
+window/size/viewport_width=1920
+window/size/viewport_height=1080
 
 [input]
 

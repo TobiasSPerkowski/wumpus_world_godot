@@ -102,7 +102,7 @@ func move_forward() -> bool:
 
 func shoot_arrow() -> bool:
 	if GameState.arrows <= 0:
-		GameState.exception.emit("Sem mais flechas")
+		GameState.message.emit("Sem mais flechas")
 		return false
 	
 	GameState.arrows -= 1

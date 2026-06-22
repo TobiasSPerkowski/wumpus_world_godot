@@ -102,6 +102,8 @@ func change_forward_cell(dir: Directions):
 		f_cell.turn_into_pit()
 	else: # stench
 		f_cell.turn_into_wumpus()
+	
+	f_cell.show_sprites()
 
 
 func get_player_cell() -> Cell:

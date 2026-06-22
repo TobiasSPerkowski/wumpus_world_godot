@@ -20,8 +20,10 @@ func player_turned(dir: String):
 
 func player_shot(scream: bool):
 	if scream:
+		GameState.message.emit("Você ouve um grito")
 		process["stdio"].store_line("s 1")
 	else:
+		GameState.message.emit("Você não ouve nada")
 		process["stdio"].store_line("s 0")
 
 

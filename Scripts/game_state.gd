@@ -2,14 +2,19 @@ extends Node
 
 const GameStatus = Enums.GameStatus
 
+signal status_changed(value)
 signal arrows_changed(value)
 signal hints_changed(value)
 signal sensors_sent(sensors)
-signal exception(text)
+signal message(text)
 
-var status := GameStatus.LOADING
 var selected_map : String
 var debug := false
+
+var status := GameStatus.LOADING:
+	set(value):
+		status = value
+		status_changed.emit(value)
 
 var arrows := 0:
 	set(value):

@@ -30,24 +30,26 @@ func _init_player():
 
 
 func _input(event: InputEvent):
-	if event.is_action_pressed("move_forward"):
-		if not _is_safe_move():
-			$Map.change_forward_cell($Player.dir)
-		_handle_movement()
-	elif event.is_action_pressed("turn_left"):
-		$Player.turn_left()
-		$Advisor.player_turned("l")
-	elif event.is_action_pressed("turn_right"):
-		$Player.turn_right()
-		$Advisor.player_turned("r")
-	elif event.is_action_pressed("shoot"):
-		if $Player.shoot_arrow():
-			var scream = $Map.shot_hit($Player.dir)
-			$Advisor.player_shot(scream)
-		else:
-			print("NO MORE ARROWS")  
-	elif event.is_action_pressed("hint"):
-		_get_hint()
+	if GameState.status == GameStatus.PLAYING:
+		if event.is_action_pressed("move_forward"):
+			if not _is_safe_move():
+				$Map.change_forward_cell($Player.dir)
+			_handle_movement()
+		elif event.is_action_pressed("turn_left"):
+			$Player.turn_left()
+			$Advisor.player_turned("l")
+		elif event.is_action_pressed("turn_right"):
+			$Player.turn_right()
+			$Advisor.player_turned("r")
+		elif event.is_action_pressed("shoot"):
+			if $Player.shoot_arrow():
+				var scream = $Map.shot_hit($Player.dir)
+				$Advisor.player_shot(scream)
+			else:
+				print("NO MORE ARROWS")  
+		elif event.is_action_pressed("hint"):
+			_get_hint()
+	
 	elif event.is_action_pressed("exit"):
 		get_tree().change_scene_to_file("res://Scenes/menu.tscn")
 
@@ -58,13 +60,11 @@ func _handle_movement():
 		if $Player.move_forward():
 			GameState.status = $Map.update(dir)
 			if GameState.status == GameStatus.LOST:
-				#$Player.hide()
-				#get_tree().paused = true
-				print("GAME OVER")
+				$Player.hide()
+				GameState.status = GameStatus.LOST
 			elif GameState.status == GameStatus.WON:
-				#$Player.hide()
-				#get_tree().paused = true
-				print("YOU WIN")
+				$Player.hide()
+				GameState.status = GameStatus.WON
 			$Advisor.send_sensors($Map.get_player_cell(), false)
 	else:
 		$Player.bump()
@@ -73,7 +73,7 @@ func _handle_movement():
 
 func _get_hint():
 	if GameState.hints <= 0:
-		GameState.exception.emit("Sem mais dicas")
+		GameState.message.emit("Sem mais dicas")
 		return
 	
 	GameState.hints -= 1
@@ -86,7 +86,7 @@ func _get_hint():
 	move = move.split(",")
 	
 	if move[0] == "e":
-		GameState.exception.emit("Sem solução")
+		GameState.message.emit("Sem solução")
 		return
 		
 	if move[0] == "s":

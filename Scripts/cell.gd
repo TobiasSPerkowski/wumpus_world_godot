@@ -51,22 +51,15 @@ func show_sprites():
 	$Floor.visible = true
 	$Hint.visible = false
 	
+	$Wall.visible = wall
 	if wall:
-		$Wall.visible = true
 		return
-		
-	if gold:
-		$Gold.visible = true
-	elif pit:
-		$Pit.visible = true
-	elif wumpus:
-		$Wumpus.visible = true
-		
-	if breeze:
-		$Breeze.visible = true
-		
-	if stench:
-		$Stench.visible = true
+	
+	$Gold.visible = gold
+	$Pit.visible = pit
+	$Wumpus.visible = wumpus
+	$Breeze.visible = breeze
+	$Stench.visible = stench
 
 
 func hint(shoot: bool):
